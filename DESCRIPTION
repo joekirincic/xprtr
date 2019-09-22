@@ -1,0 +1,26 @@
+Package: xprtr
+Title: xprtr: a Shiny app for exporting Tableau datasources
+Version: 0.0.0.9000
+Authors@R: person('Joe', 'Kirincic', email = 'jdkirincic@gmail.com', role = c('cre', 'aut'))
+Description: Use xprtr to add advanced reporting capabilities to Tableau dashboards using Shiny and the Tableau Extensions API.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    shiny,
+    golem,
+    processx,
+    attempt,
+    DT,
+    glue,
+    htmltools,
+    dplyr,
+    purrr,
+    readr,
+    tidyr,
+    lubridate,
+    shinyjs,
+    pkgload
+RoxygenNote: 6.1.0
+Suggests: 
+    testthat
