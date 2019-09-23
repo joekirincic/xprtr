@@ -13,7 +13,7 @@ golem::add_module( name = "read_tds" ) # Name of the module
 
 ## 2.2 Add dependencies
 
-usethis::use_package( "shinyJS" ) # To call each time you need a new package
+usethis::use_package( "janitor" ) # To call each time you need a new package
 
 ## 2.3 Add tests
 
@@ -25,8 +25,8 @@ golem::browser_button()
 
 ## 2.5 Add external files
 
-golem::add_js_file( "script" )
-golem::add_js_handler( "handlers" )
+golem::add_js_file( "tableau_utils" )
+golem::add_js_handler( "input_handlers" )
 golem::add_css_file( "custom" )
 
 # 3. Documentation

@@ -5,7 +5,12 @@ app_ui <- function() {
     golem_add_external_resources(),
     # List the first level UI elements here 
     fluidPage(
-      h1("xprtr")
+      h1("xprtr"),
+      shinyjs::useShinyjs(),
+      mod_read_tds_ui("read_tds_ui_1"),
+      shinyjs::runcodeUI(),
+      actionButton("browser", "browser"),
+      tags$script("$('#browser').hide();")
     )
   )
 }
@@ -19,7 +24,9 @@ golem_add_external_resources <- function(){
  
   tags$head(
     golem::activate_js(),
-    golem::favicon()
+    golem::favicon(),
+    tags$script(src = "www/tableau_datasource_utils.js"),
+    tags$script(src = "www/tableau.extensions.1.latest.js")
     # Add here all the external resources
     # If you have a custom.css in the inst/app/www
     # Or for example, you can add shinyalert::useShinyalert() here

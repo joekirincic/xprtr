@@ -20,7 +20,15 @@ Imports:
     tidyr,
     lubridate,
     shinyjs,
-    pkgload
-RoxygenNote: 6.1.0
+    pkgload,
+    tibble,
+    vroom,
+    jsonlite,
+    V8,
+    promises,
+    future,
+    magrittr,
+    janitor
+RoxygenNote: 6.1.1
 Suggests: 
     testthat

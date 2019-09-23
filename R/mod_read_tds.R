@@ -15,9 +15,19 @@
 #' @importFrom shiny NS tagList 
 mod_read_tds_ui <- function(id){
   ns <- NS(id)
-  tagList(
   
+  sidebarLayout(
+    sidebarPanel(
+      textInput(inputId = ns("filter_field"), label = "Field"),
+      textInput(inputId = ns("filter_values"), label = "Field Values"),
+      actionButton(inputId = ns("redify"), "Woah!")
+    ),
+    mainPanel(
+      verbatimTextOutput(ns("table1")),
+      verbatimTextOutput(ns("table2"))
+    )
   )
+  
 }
     
 # Module Server
@@ -28,6 +38,56 @@ mod_read_tds_ui <- function(id){
     
 mod_read_tds_server <- function(input, output, session){
   ns <- session$ns
+  
+  tds <- reactive({
+    
+    # For now, display whatever's not null.
+    
+    if(is.null(input$payload)){
+      data_ <- xprtr::super_store
+    }
+    else{
+      data_ <- input$payload
+      # data_ <- input$payload %>%
+      #   jsonlite:::fromJSON(simplifyDataFrame = TRUE) %>%
+      #   as_tibble()
+    }
+    
+    # data_ <- `%||%`(input$payload, xprtr::super_store)
+    
+    return(data_)
+    
+  })
+  
+  output$table1 <- renderPrint({
+    
+    validate(need(tds(), "No data yet."))
+    
+    head(tds())
+    
+  })
+  
+  output$table2 <- renderPrint({
+    validate(need(input$payload, "No `payload` yet."))
+    
+    head(tds())
+    
+  })
+  
+  observeEvent( input$redify , {
+    
+    spec <- list(
+      filter_field = input$filter_field, 
+      filter_values = input$filter_values %>% stringr::str_split(",") %>% unlist() %>% as.integer()
+      ) %>%
+      jsonlite:::toJSON(auto_unbox = TRUE)
+    
+    golem::invoke_js("showMe", spec)
+    
+  })
+  
+  
+  return(tds)
 }
     
 ## To be copied in the UI
