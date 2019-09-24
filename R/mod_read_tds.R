@@ -18,13 +18,11 @@ mod_read_tds_ui <- function(id){
   
   sidebarLayout(
     sidebarPanel(
-      textInput(inputId = ns("filter_field"), label = "Field"),
-      textInput(inputId = ns("filter_values"), label = "Field Values"),
+      numericInput(inputId = ns("n"), label = "Total Rows", value = 793),
       actionButton(inputId = ns("redify"), "Woah!")
     ),
     mainPanel(
-      verbatimTextOutput(ns("table1")),
-      verbatimTextOutput(ns("table2"))
+      verbatimTextOutput(ns("table1"))
     )
   )
   
@@ -39,25 +37,27 @@ mod_read_tds_ui <- function(id){
 mod_read_tds_server <- function(input, output, session){
   ns <- session$ns
   
-  tds <- reactive({
-    
-    # For now, display whatever's not null.
-    
-    if(is.null(input$payload)){
-      data_ <- xprtr::super_store
-    }
-    else{
-      data_ <- input$payload
-      # data_ <- input$payload %>%
-      #   jsonlite:::fromJSON(simplifyDataFrame = TRUE) %>%
-      #   as_tibble()
-    }
-    
-    # data_ <- `%||%`(input$payload, xprtr::super_store)
-    
-    return(data_)
-    
-  })
+  tf <- tempfile(fileext = ".csv")
+  file.create(tf)
+  
+  tds <- reactiveFileReader(1000, session, tf, vroom::vroom, delim = ",", col_names = FALSE)
+  
+  rvs <- reactiveValues(observers = list())
+  
+  # tds <- reactive({
+  #   
+  #   # For now, display whatever's not null.
+  #   
+  #   if(nrow()){
+  #     data_ <- xprtr::super_store
+  #   }
+  #   else{
+  #     data_ <- input$payload
+  #   }
+  #   
+  #   return(data_)
+  #   
+  # })
   
   output$table1 <- renderPrint({
     
@@ -67,27 +67,22 @@ mod_read_tds_server <- function(input, output, session){
     
   })
   
-  output$table2 <- renderPrint({
-    validate(need(input$payload, "No `payload` yet."))
-    
-    head(tds())
-    
-  })
+  # output$table2 <- renderPrint({
+  #   
+  #   validate(need(input$payload, "No `payload` yet."))
+  #   
+  #   head(tds())
+  #   
+  # })
   
   observeEvent( input$redify , {
     
-    spec <- list(
-      filter_field = input$filter_field, 
-      filter_values = input$filter_values %>% stringr::str_split(",") %>% unlist() %>% as.integer()
-      ) %>%
-      jsonlite:::toJSON(auto_unbox = TRUE)
-    
-    golem::invoke_js("showMe", spec)
+    extract_datasource()
     
   })
   
-  
   return(tds)
+  
 }
     
 ## To be copied in the UI

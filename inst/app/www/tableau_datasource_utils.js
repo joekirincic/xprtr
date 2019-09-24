@@ -10,7 +10,8 @@ $( document ).ready(function() {
           let rows = x.data.map(function(row){return row.map(function(col){ return col._value })});
           let df = rows.map(function(row){ let x = {}; cols.forEach(function(col){ x[col] = row[cols.indexOf(col)]}); return x });
           payload = JSON.stringify(df);
-          Shiny.setInputValue("read_tds_ui_1-payload:read_tds", payload);
+          let id = m.chunk_id_verbose[0];
+          Shiny.setInputValue(id, payload);
         });
       });
     });
