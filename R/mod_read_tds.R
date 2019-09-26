@@ -19,9 +19,14 @@ mod_read_tds_ui <- function(id){
   sidebarLayout(
     sidebarPanel(
       numericInput(inputId = ns("n"), label = "Total Rows", value = 793),
-      actionButton(inputId = ns("redify"), "Woah!")
+      fluidRow(
+        column(width = 6, actionButton(inputId = ns("redify"), "Run Report")),
+        column(width = 6, downloadButton(outputId = ns("download_data"), label = "Download"))
+      )
     ),
     mainPanel(
+      verbatimTextOutput(ns("success")),
+      verbatimTextOutput(ns("tfile")),
       verbatimTextOutput(ns("table1"))
     )
   )
@@ -40,24 +45,13 @@ mod_read_tds_server <- function(input, output, session){
   tf <- tempfile(fileext = ".csv")
   file.create(tf)
   
-  tds <- reactiveFileReader(1000, session, tf, vroom::vroom, delim = ",", col_names = FALSE)
+  tds <- reactiveFileReader(1000, session, tf, vroom::vroom, delim = ",", col_names = TRUE)
   
-  rvs <- reactiveValues(observers = list())
+  rvs <- reactiveValues(incrementer = 0)
   
-  # tds <- reactive({
-  #   
-  #   # For now, display whatever's not null.
-  #   
-  #   if(nrow()){
-  #     data_ <- xprtr::super_store
-  #   }
-  #   else{
-  #     data_ <- input$payload
-  #   }
-  #   
-  #   return(data_)
-  #   
-  # })
+  output$tfile <- renderPrint({
+    tf
+  })
   
   output$table1 <- renderPrint({
     
@@ -67,23 +61,39 @@ mod_read_tds_server <- function(input, output, session){
     
   })
   
-  # output$table2 <- renderPrint({
-  #   
-  #   validate(need(input$payload, "No `payload` yet."))
-  #   
-  #   head(tds())
-  #   
-  # })
-  
   observeEvent( input$redify , {
     
-    extract_datasource()
+    rvs$observers <- extract_datasource(n = input$n, dest = tf, input = input)
     
+  })
+  
+  output$download_data <- downloadHandler(
+    filename <- function() {
+      paste0("report_", stringi::stri_rand_strings(n = 1, length = 13), ".csv")
+    },
+    
+    content <- function(file) {
+      file.copy(tf, file)
+    },
+    contentType = "text/csv"
+  )
+  
+  output$success <- renderPrint({
+    cat(
+      paste0("input_n: ", input$n),
+      paste0("nrow(tds()): ", nrow(tds())),
+      paste0("success: ", dplyr::near(input$n, nrow(tds())))
+    )
+  })
+  
+  observe({
+    shinyjs::toggleState(id = "download_data", condition = nrow(tds()) == input$n)
   })
   
   return(tds)
   
 }
+
     
 ## To be copied in the UI
 # mod_read_tds_ui("read_tds_ui_1")

@@ -10,7 +10,7 @@ $( document ).ready(function() {
           let rows = x.data.map(function(row){return row.map(function(col){ return col._value })});
           let df = rows.map(function(row){ let x = {}; cols.forEach(function(col){ x[col] = row[cols.indexOf(col)]}); return x });
           payload = JSON.stringify(df);
-          let id = m.chunk_id_verbose[0];
+          let id = m.chunk_id_verbose[0] + ":read_tds";
           Shiny.setInputValue(id, payload);
         });
       });
