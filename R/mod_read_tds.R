@@ -45,9 +45,14 @@ mod_read_tds_server <- function(input, output, session){
   tf <- tempfile(fileext = ".csv")
   file.create(tf)
   
+  ticker <- reactiveVal(0)
+  
   tds <- reactiveFileReader(1000, session, tf, vroom::vroom, delim = ",", col_names = TRUE)
   
-  rvs <- reactiveValues(incrementer = 0)
+  jobs <- reactive({
+    f(field = "AGG(ID)", n = input$n)
+  })
+  
   
   output$tfile <- renderPrint({
     tf
@@ -62,9 +67,7 @@ mod_read_tds_server <- function(input, output, session){
   })
   
   observeEvent( input$redify , {
-    
-    rvs$observers <- extract_datasource(n = input$n, dest = tf, input = input)
-    
+    golem::invoke_js("fetch_tds_", "1")
   })
   
   output$download_data <- downloadHandler(
@@ -88,6 +91,7 @@ mod_read_tds_server <- function(input, output, session){
   
   observe({
     shinyjs::toggleState(id = "download_data", condition = nrow(tds()) == input$n)
+    
   })
   
   return(tds)

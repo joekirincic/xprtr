@@ -36,37 +36,37 @@ make_request <- function(x){
   
 }
 
-extract_datasource <- function(n, dest, input){
-  
-  chunks <- f(field = "AGG(ID)", n = n)
-  
-  obs <- purrr::list_along(nrow(chunks))
-  
-  for(i in seq_len(nrow(chunks))){
-    chunk <- chunks[i, ]
-    input_id <- dplyr::pull(chunk, chunk_id)
-    
-    # Form message to send Tableau.
-    msg <- make_request(chunk)
-    # Create an observer to watch for it.
-    if(i == 1){
-      ob <- observeEvent( input[[input_id]] , {
-        input[[input_id]] %>%
-          vroom::vroom_write(path = dest, delim = ",", append = TRUE, col_names = TRUE)
-      })
-    }
-    else{
-      ob <- observeEvent( input[[input_id]] , {
-        input[[input_id]] %>%
-          vroom::vroom_write(path = dest, delim = ",", append = TRUE)
-      }) 
-    }
-    # Add observer to group.
-    obs[[i]] <- ob
-    # Send message to Tableau.
-    golem::invoke_js("fetch_tds_chunked", msg)
-  }
-  
-  return(obs)
-  
-}
+# make_observers <- function(jobs, dest, input){
+#   
+#   obs <- purrr::list_along(nrow(jobs()))
+#   
+#   for(i in seq_len(nrow(jobs()))){
+#     job <- jobs()[i, ]
+#     input_id <- dplyr::pull(job, chunk_id)
+#     
+#     # Create an observer to watch for it.
+#     ob <- observeEvent( input[[input_id]] , {
+#       input[[input_id]] %>%
+#         vroom::vroom_write(path = dest, delim = ",", append = TRUE, col_names = TRUE)
+#       uptick <- ticker() + 1
+#       ticker(uptick)
+#       msg <- make_request(jobs()[uptick, ])
+#       golem::invoke_js("fetch_tds_chunked", msg)
+#     })
+#     
+#     # Add observer to group.
+#     obs[[i]] <- ob
+#     
+#   }
+#   
+#   return(obs)
+#   
+# }
+
+# run_job <- function(jobs, rvs){
+#   
+#   job <- jobs()[rvs$ticker, ]
+#   msg <- make_request(job)
+#   
+#   golem::invoke_js("fetch_tds_chunked", msg)
+# }

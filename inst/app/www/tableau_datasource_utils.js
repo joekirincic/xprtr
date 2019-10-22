@@ -17,3 +17,20 @@ $( document ).ready(function() {
     });
   });
 });
+
+$( document ).ready(function() {
+  Shiny.addCustomMessageHandler("fetch_tds_", function(message) {
+    var payload; var m = JSON.parse(message);
+    tableau.extensions.initializeAsync().then(function(){
+      var dsh = tableau.extensions.dashboardContent.dashboard;
+      var sht = dsh.worksheets[0];
+      sht.getSummaryDataAsync().then(function(x){
+        let cols = x.columns.map(function(col){ return col._fieldName });
+        let rows = x.data.map(function(row){return row.map(function(col){ return col._value })});
+        let df = rows.map(function(row){ let x = {}; cols.forEach(function(col){ x[col] = row[cols.indexOf(col)]}); return x });
+        payload = JSON.stringify(df);
+        Shiny.setInputValue("data:read_tds", payload);
+        });
+      });
+    });
+  });
