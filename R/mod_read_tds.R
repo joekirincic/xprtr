@@ -67,14 +67,6 @@ mod_read_tds_server <- function(input, output, session){
     
   })
   
-  # output$table2 <- renderPrint({
-  #   
-  #   validate(need(input$payload, "No `payload` yet."))
-  #   
-  #   head(tds())
-  #   
-  # })
-  
   observeEvent( input$redify , {
     
     extract_datasource()
